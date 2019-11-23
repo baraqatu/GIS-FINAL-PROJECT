@@ -1,0 +1,233 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+        integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+        crossorigin=""/>
+        <link rel="stylesheet" href="assets/js/leaflet-panel-layers-master/src/leaflet-panel-layers.css" />
+        <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+        <title>Test Map</title>
+    </head>
+
+    <body>
+        <div class="headers">
+            <h2>Tugas Final SIG</h2>
+        </div>
+            <div id="mapid"></div>   
+    </body>
+         <!-- Make sure you put this AFTER Leaflet's CSS -->
+         <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+         integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+         crossorigin=""></script>
+
+         <script src="assets/js/leaflet-panel-layers-master/src/leaflet-panel-layers.js"></script>
+         <script src="assets/js/leaflet.ajax.js"></script>
+ 
+         <script type="text/javascript">
+
+            var map = L.map('mapid').setView([-6.5675253, 112.2535869], 8);
+
+            var layer_lagenda=L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+                attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+                maxZoom: 21,
+                id: 'mapbox.streets',
+                accessToken: 'pk.eyJ1IjoiYWtiYXJhdG9yaSIsImEiOiJjazM0MG9rc3kweGpvM2RtanYxemo4aW44In0.sinw42NuYfdaK83mhLgN0w'
+            });
+                map.addLayer(layer_lagenda)
+
+            function popUp(f,l){
+                var out = [];
+                    if (f.properties){
+                        for(key in f.properties){
+                            out.push(key+": "+f.properties[key]);
+                        }
+                        l.bindPopup(out.join("<br />"));
+                }
+            }
+
+            //Legend
+            function iconByName(name) {
+                return '<i class="icon icon-'+name+'"></i>';
+            }
+
+            function featureToMarker(feature, latlng) {
+                return L.marker(latlng, {
+                    icon: L.divIcon({
+                        className: 'marker-'+feature.properties.amenity,
+                        html: iconByName(feature.properties.amenity),
+                        iconUrl: '../images/markers/'+feature.properties.amenity+'.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        popupAnchor: [1, -34],
+                        shadowSize: [41, 41]
+                    })
+                });
+            }
+
+            function getColor(d) {
+                return d > 1000 ? '#800026' :
+                    d > 500  ? '#BD0026' :
+                    d > 200  ? '#E31A1C' :
+                    d > 100  ? '#FC4E2A' :
+                    d > 50   ? '#FD8D3C' :
+                    d > 20   ? '#FEB24C' :
+                    d > 10   ? '#FED976' :
+                                '#FFEDA0';
+            }
+
+            function style(feature) {
+                return {
+                    fillColor:getColor(Math.random()*1000),
+                    weight: 2,
+                    opacity: 1,
+                    color: 'white',
+                    dashArray: '3',
+                    fillOpacity: 0.7
+                };
+            }
+
+            var legend = L.control({position: 'bottomright'});
+
+            legend.onAdd = function (map) {
+
+                var div = L.DomUtil.create('div', 'info legend'),
+                    grades = [0, 10, 20, 50, 100, 200, 500, 1000],
+                    labels = [];
+
+                // loop through our density intervals and generate a label with a colored square for each interval
+                for (var i = 0; i < grades.length; i++) {
+                    div.innerHTML +=
+                        '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+                        grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+                }
+
+                return div;
+            };
+
+            legend.addTo(map);
+
+            
+            var jsonTest = new 
+            L.GeoJSON.AJAX(["assets/geojson/Sukabumi_Regence.geojson"],{
+                onEachFeature:popUp,
+                 style: style}).addTo(map);
+
+            //LAYER GROUP//
+            var SLTP = L.layerGroup();    
+                // SMP Kec. Balong Panggang
+                L.marker([-7.2670792, 112.4533064]).bindPopup('<strong>SMP NEGERI 1 BALONG PANGGANG</strong></br> <b>NPSN</b> : 20500499 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/6DDC0A80288996563F78">More Information</a>').addTo(SLTP),
+                L.marker([-7.2725575,112.440165]).bindPopup('<strong>SMP NEGERI 2 BALONGPANGGANG</strong></br> <b>NPSN</b> : 20500517 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/267B4FD965C435EBE6B5">More Information</a>').addTo(SLTP),
+                L.marker([-7.2504659,112.4312184]).bindPopup('<strong>SMP NEGERI 3 BALONGPANGGANG</strong></br> <b>NPSN</b> : 20500508 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/4B0911C88CEA77B49AC8">More Information</a>').addTo(SLTP),
+                L.marker([-7.2726093,112.4409618]).bindPopup('<strong>SMP MAARIF HAYATUL WATHON</strong></br> <b>NPSN</b> : 20500432 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/7D16D273D7DCEE2AB4C5">More Information</a>').addTo(SLTP),
+                L.marker([-7.2621498,112.4465636]).bindPopup('<strong>SMP MUHAMMADIYAH 2 BALONGPANGGANG </strong></br> <b>NPSN</b> : 20500557 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/15124CDEF7FE7D229F7C">More Information</a>').addTo(SLTP),
+                
+                // SMP Kec.Benjeng 
+                L.marker([-7.2598989,112.5065723]).bindPopup('<strong>SMP NEGERI 1 BENJENG </strong></br> <b>NPSN</b> : 20500498 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/B0D51EB74E1660A1CBBC">More Information</a>').addTo(SLTP),
+                L.marker([-7.2949513,112.4825323]).bindPopup('<strong>SMP NEGERI 2 BENJENG</strong></br> <b>NPSN</b> : 20500516 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/FD5E1F4B35EA80F33AF9">More Information</a>').addTo(SLTP),
+                L.marker([-7.2638757,112.4947855]).bindPopup('<strong>SMP MA ARIF NU</strong></br> <b>NPSN</b> : 20500431 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/82EC24B710B32D301F57">More Information</a>').addTo(SLTP),
+                L.marker([-7.2438887,112.4950757]).bindPopup('<strong>SMP MAARIF GEMPOL </strong></br> <b>NPSN</b> : 20500434 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/69FD424916FEEA76693E">More Information</a>').addTo(SLTP),
+                L.marker([-7.2642955,112.4870676]).bindPopup('<strong>SMP MIFTAHURROHMAN </strong></br> <b>NPSN</b> : 20500429 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/2D31E7A274E9CE3AA654">More Information</a>').addTo(SLTP),
+                L.marker([-7.2444531,112.4966481]).bindPopup('<strong>SMP MUHAMMADIYAH 8 </strong></br> <b>NPSN</b> : 20500530 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/512A18B191ABB708E7EF">More Information</a>').addTo(SLTP),
+
+                // SMP Kec.Bungah
+                L.marker([-7.0518398,112.5758751]).bindPopup('<strong>SMP NEGERI  1 BUNGAH</strong></br> <b>NPSN</b> : 20500497 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/6647F76DFE9976D45F1E">More Information</a>').addTo(SLTP),
+                L.marker([-7.0541147,112.5724876]).bindPopup('<strong>SMP AL ISHLAH BUNGAH </strong></br> <b>NPSN</b> : 20556175 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/A6136FE47022C2FC41FC">More Information</a>').addTo(SLTP),
+                L.marker([-7.0553818,112.5723028]).bindPopup('<strong>SMP ASSAADAH </strong></br> <b>NPSN</b> : 20500427 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/1FE6A6BED3AF441B2587">More Information</a>').addTo(SLTP),
+                L.marker([-7.0464556,112.5643627]).bindPopup('<strong>SMP DARUSSALAM TEGAL JOYO </strong></br> <b>NPSN</b> : 69988214 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/74BAEC186DC75A547BFB">More Information</a>').addTo(SLTP),
+                
+                // SMP Kec. Cerme
+                L.marker([-7.2346201,112.5648226]).bindPopup('<strong>SMP NEGERI 1 CERME</strong></br> <b>NPSN</b> : 20500496 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/E7C0C4BDCF65EBF37EB8">More Information</a>').addTo(SLTP),
+                L.marker([-7.2240624,112.5408739]).bindPopup('<strong>SMP NEGERI 2 CERME</strong></br> <b>NPSN</b> : 20500515 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/4D40BD98F797379BA933">More Information</a>').addTo(SLTP),
+                
+                //SMP Kec.Driyorejo
+                L.marker([-7.3540403,112.6283417]).bindPopup('<strong> SMP NEGERI 1 DRIYOREJO </strong></br> <b>NPSN</b> : 20500495 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/03657D828AFB0F1C9B11">More Information</a>').addTo(SLTP),
+                
+                // SMP Kec.Duduk Sampeyan
+                L.marker([-7.1721938,112.511484]).bindPopup('<strong>SMP NEGERI 1 DUDUKSAMPEYAN</strong></br> <b>NPSN</b> : 20500494 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/8221459F44EC9AC46AA2">More Information</a>').addTo(SLTP),
+                
+                // SMP Kec.Dukun
+                L.marker([-6.9758327,112.4575128]).bindPopup('<strong>SMP NEGERI 1 DUKUN </strong></br> <b>NPSN</b> : 20500493 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/B8B858CABB870B0BADB1">More Information</a>').addTo(SLTP),
+                
+                // SMP Kec.Gresik
+                L.marker([-7.1616721,112.652762]).bindPopup('<strong>SMP NEGERI 1 GRESIK</strong></br> <b>NPSN</b> : 20500492 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/E3A088478B654A7AA921">More Information</a>').addTo(SLTP),
+                L.marker([-7.1534732,112.658018]).bindPopup('<strong>SMP NEGERI 2 GRESIK</strong></br> <b>NPSN</b> : 20500514 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/3CA1BA1C80E8B1C6652D">More Information</a>').addTo(SLTP),
+                L.marker([-7.1677757,112.6536843]).bindPopup('<strong>SMP NEGERI 3 GRESIK</strong></br> <b>NPSN</b> : 20500507 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/0B2BFEDDEAC029E19742">More Information</a>').addTo(SLTP),
+                L.marker([-7.162054,112.6462267]).bindPopup('<strong>SMP NEGERI 4 GRESIK</strong></br> <b>NPSN</b> : 20500505 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/9D1F3408778B8A3519F7">More Information</a>').addTo(SLTP),
+                
+                // SMP Kec.Kebomas
+                L.marker([-7.1769916,112.6229861]).bindPopup('<strong>SMP NEGERI 1 KEBOMAS</strong></br> <b>NPSN</b> : 20500491 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/722842240D31720DCC8C">More Information</a>').addTo(SLTP),
+                L.marker([-7.1614671,112.6185018]).bindPopup('<strong>SMP NEGERI 2 KEBOMAS</strong></br> <b>NPSN</b> : 20500513 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/AB51F228F5D9888EEEDF">More Information</a>').addTo(SLTP),
+                
+                // SMP Kec.Kedamean
+                L.marker([-7.32214,112.5660243]).bindPopup('<strong>SMP NEGERI 1 KEDAMEAN</strong></br> <b>NPSN</b> : 20500490 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/6A9E8755B18831F115B2">More Information</a>').addTo(SLTP),
+                L.marker([-7.322845,112.5658505]).bindPopup('<strong>SMP PGRI KEDAMEAN</strong></br> <b>NPSN</b> : 20500553 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/9896C9303772D4881BA5">More Information</a>').addTo(SLTP),
+                L.marker([-7.3242496,112.5123918]).bindPopup('<strong>SMP UDKP </strong></br> <b>NPSN</b> : 20500500 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/B5004C209B3717B9C9F8">More Information</a>').addTo(SLTP),
+                
+                // SMP Kec.Manyar
+                L.marker([-7.1400293,112.6157251]).bindPopup('<strong>SMP NEGERI 1 MANYAR</strong></br> <b>NPSN</b> : 20500489 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/6160060F818D1DB504A7">More Information</a>').addTo(SLTP),
+                L.marker([-7.0752298,112.5734753]).bindPopup('<strong>SMP NEGERI 2 MANYAR</strong></br> <b>NPSN</b> : 20500512 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/D40088C19C2D924ECB7E">More Information</a>').addTo(SLTP),
+                L.marker([-7.1543905,112.5950751]).bindPopup('<strong>SMP ISLAM DZIN NUUR </strong></br> <b>NPSN</b> : 69945343 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/5216EDA23B1F2FA3543A">More Information</a>').addTo(SLTP),
+                L.marker([-7.1418653,112.6152747]).bindPopup('<strong>SMP ISLAMIC QON </strong></br> <b>NPSN</b> : 20574668 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/3418F57C7701BCDD702A">More Information</a>').addTo(SLTP),
+                
+                // SMP Kec.Menganti
+                L.marker([-7.2757755,112.5637185]).bindPopup('<strong>SMP NEGERI 1 MENGANTI</strong></br> <b>NPSN</b> : 20500488 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/351078037FAED31D4717">More Information</a>').addTo(SLTP),
+                L.marker([-7.3015499,112.616983]).bindPopup('<strong>SMP NEGERI 2 MENGANTI</strong></br> <b>NPSN</b> : 20500511 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/C1CDCBFAAE70FFEE0EDF">More Information</a>').addTo(SLTP),
+                L.marker([-7.2936916,112.5852424]).bindPopup('<strong>SMP AL AZHAR </strong></br> <b>NPSN</b> : 20500410 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/14393F468760CE47A682">More Information</a>').addTo(SLTP),
+                L.marker([-7.266643,112.616691]).bindPopup('<strong>SMP CITRA ADIKARYA </strong></br> <b>NPSN</b> : 69981208 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/353BBD6C589C246347D9">More Information</a>').addTo(SLTP),
+                
+                // SMP Kec.Panceng
+                L.marker([-6.917126, 112.454874]).bindPopup('<strong>SMP NEGERI 1 PANCENG</strong></br> <b>NPSN</b> : 20500487 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/46F6845360CAFF276840">More Information</a>').addTo(SLTP),
+                L.marker([-6.901417, 112.477542]).bindPopup('<strong>SMP AL IKHLASH </strong></br> <b>NPSN</b> : 20577818 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/06B6539DD97B1C79BE2D">More Information</a>').addTo(SLTP),
+                L.marker([-6.984864, 112.574058]).bindPopup('<strong>SMP MA ARIF </strong></br> <b>NPSN</b> : 20500430 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/F8D653D628951073407D">More Information</a>').addTo(SLTP),
+                L.marker([-6.926629, 112.456246]).bindPopup('<strong>SMP NU DARUL UBUDIYAH </strong></br> <b>NPSN</b> : 69831547 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/D635A0FFE596147AE89D">More Information</a>').addTo(SLTP),
+                
+                // SMP Kec.Sangkapura
+                L.marker([-5.791260, 112.646238]).bindPopup('<strong>SMP NEGERI 1 SANGKAPURA</strong></br> <b>NPSN</b> : 20500486 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/27BA15DF3F2203B0EDDD">More Information</a>').addTo(SLTP),
+                L.marker([5.807864, 112.582431]).bindPopup('<strong>SMP NEGERI SATU ATAP</strong></br> <b>NPSN</b> : 20553256 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/A3EE875FCEACC4B2DC09">More Information</a>').addTo(SLTP),
+                
+                // SMP Kec.Sidayu
+                L.marker([-6.988745, 112.565197]).bindPopup('<strong>SMP NEGERI 1 SIDAYU</strong></br> <b>NPSN</b> : 20500485 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/71A8D74AC05D73AE9CBE">More Information</a>').addTo(SLTP),
+                L.marker([-6.961716, 112.511639]).bindPopup('<strong>SMP NEGERI 2 SIDAYU</strong></br> <b>NPSN</b> : 20500510 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/1F876AAC18EE572DA330">More Information</a>').addTo(SLTP),
+                L.marker([-6.987597, 112.565633]).bindPopup('<strong>SMP NEGERI 3 SIDAYU</strong></br> <b>NPSN</b> : 20500506 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/BB57E227AD03708BA99D">More Information</a>').addTo(SLTP),
+                L.marker([-6.986184, 112.509078]).bindPopup('<strong>SMP NEGERI 4 SIDAYU</strong></br> <b>NPSN</b> : 20500504 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/8393C00532AE71DEC975">More Information</a>').addTo(SLTP),
+
+                // SMP Kec.Tambak
+                L.marker([-5.733614, 112.643418]).bindPopup('<strong>SMP NEGERI 1 TAMBAK GRESIK</strong></br> <b>NPSN</b> : 20500501 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/E6A12E13453DBC763640">More Information</a>').addTo(SLTP),
+                L.marker([-5.754420, 112.722971]).bindPopup('<strong>SMP ISLAM NURUL QIDAMI </strong></br> <b>NPSN</b> : 69970005 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/A40718AE4C764C23663B">More Information</a>').addTo(SLTP),
+                L.marker([-5.730861, 112.647167]).bindPopup('<strong>SMP ISLAMIYAH BAWEAN </strong></br> <b>NPSN</b> : 20500437 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/17420C775A0A4FE3A94A">More Information</a>').addTo(SLTP),
+                
+                // SMP Kec.Ujung Pangkah
+                L.marker([-6.915971, 112.548057]).bindPopup('<strong>SMP NEGERI 1 UJUNGPANGKAH</strong></br> <b>NPSN</b> : 20500502 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/22C8BAA6656B1C09549B">More Information</a>').addTo(SLTP),
+                L.marker([-6.912081, 112.532920]).bindPopup('<strong>SMP MAARIF NU AL FATTAH </strong></br> <b>NPSN</b> : 20500484 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/A0ED06DC149E23179ADA">More Information</a>').addTo(SLTP),
+                L.marker([-6.934260, 112.510534]).bindPopup('<strong>SMP MUHAMMADIYAH 11 </strong></br> <b>NPSN</b> : 20500409 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/76878C710CA4E19EB21A">More Information</a>').addTo(SLTP),
+                
+                // SMP Kec.Wringin Anom
+                L.marker([-7.394849, 112.536666]).bindPopup('<strong>SMP NEGERI 1 WRINGINANOM</strong></br> <b>NPSN</b> : 20500518 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/2D423488F863F7D05376">More Information</a>').addTo(SLTP),
+                L.marker([-7.394931, 112.501646]).bindPopup('<strong>SMP NEGERI 2 WRINGINANOM</strong></br> <b>NPSN</b> : 20500509 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/C8683675845B561F6882">More Information</a>').addTo(SLTP),
+                L.marker([-7.375029, 112.560060]).bindPopup('<strong>SMP ISLAM WRINGINANOM </strong></br> <b>NPSN</b> : 20500438 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/2052ACBFD2235C2710D2">More Information</a>').addTo(SLTP),
+                L.marker([-7.396137, 112.530841]).bindPopup('<strong>SMP PGRI WRINGINANOM </strong></br> <b>NPSN</b> : 20500550 </br> <a href="http://dapo.dikdasmen.kemdikbud.go.id/sekolah/4BF5E6011C0283932C0D">More Information</a>').addTo(SLTP)
+
+            var mbAttr = 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+			'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ',
+            mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiYWtiYXJhdG9yaSIsImEiOiJjazM0MG9rc3kweGpvM2RtanYxemo4aW44In0.sinw42NuYfdaK83mhLgN0w';
+            
+            var grayscale   = L.tileLayer(mbUrl, {id: 'mapbox.light', attribution: mbAttr}),
+		    streets  = L.tileLayer(mbUrl, {id: 'mapbox.streets',   attribution: mbAttr});
+
+	        var baseLayers = {
+                "Grayscale": grayscale,
+                "Streets": streets
+            };
+
+	        var overlays = {
+                "SLTP": SLTP
+            };
+
+            L.control.layers(baseLayers, overlays).addTo(map);
+
+            var baseMaps = {
+                "<span style='color: gray'>Grayscale</span>": grayscale,
+                "Streets": streets
+            };
+                        
+        </script>        
+</html>
